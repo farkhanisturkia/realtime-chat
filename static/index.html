@@ -78,6 +78,18 @@
       border-bottom-left-radius: 2px;
     }
 
+    .message .username {
+      font-weight: 600;
+      font-size: 0.84rem;
+      color: #006a4e;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .message.sent .username {
+      display: none;
+    }
+
     .input-area {
       background: #f0f0f0;
       padding: 10px 16px;
@@ -85,6 +97,16 @@
       align-items: center;
       gap: 10px;
       border-top: 1px solid #d1d1d1;
+    }
+
+    #username {
+      width: 168px;
+      padding: 11px 14px;
+      border: 1px solid #c8c8c8;
+      border-radius: 24px;
+      font-size: 0.95rem;
+      outline: none;
+      background: white;
     }
 
     #input {
@@ -142,6 +164,7 @@
     <div id="messages"></div>
 
     <div class="input-area">
+      <input id="username" type="text" placeholder="Nama kamu..." />
       <input id="input" type="text" placeholder="Ketik pesan..." autofocus />
       <button onclick="sendMessage()">➤</button>
     </div>
@@ -149,9 +172,9 @@
 
   <script>
     // ────────────────────────────────────────────────
-    // Generate random 12-char anonymous ID
+    // Generate random 12-char username
     // ────────────────────────────────────────────────
-    function generateRandomId(length = 12) {
+    function generateRandomUsername(length = 12) {
       const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
       let result = "";
       for (let i = 0; i < length; i++) {
@@ -160,8 +183,16 @@
       return result;
     }
 
-    // Username di-generate sekali dan tidak bisa diubah
-    const username = generateRandomId();
+    const usernameInput = document.getElementById("username");
+
+    // Auto-fill random username on first load
+    usernameInput.value = generateRandomUsername();
+
+    let username = usernameInput.value.trim();
+
+    usernameInput.onchange = () => {
+      username = usernameInput.value.trim() || generateRandomUsername();
+    };
 
     // ────────────────────────────────────────────────
     // WebSocket connection
@@ -169,7 +200,7 @@
     const ws = new WebSocket("ws://" + location.host + "/ws?username=" + encodeURIComponent(username));
 
     ws.onopen = () => {
-      console.log("Connected as anonymous → " + username);
+      console.log("Connected as → " + username);
     };
 
     ws.onclose = () => {
@@ -183,15 +214,19 @@
         const messageDiv = document.createElement("div");
         messageDiv.classList.add("message");
 
-        const myId = username.trim().toLowerCase();
-        const senderId = (msg.username || "???").trim().toLowerCase();
-        const isMe = senderId === myId;
+        const myName = username.trim().toLowerCase();
+        const sender = (msg.username || "Anon").trim();
+        const isMe = sender.toLowerCase() === myName;
 
         if (isMe) {
           messageDiv.classList.add("sent");
         } else {
           messageDiv.classList.add("received");
-          // Tidak menampilkan username sama sekali
+
+          const nameSpan = document.createElement("span");
+          nameSpan.classList.add("username");
+          nameSpan.textContent = sender;
+          messageDiv.appendChild(nameSpan);
         }
 
         const textNode = document.createTextNode(msg.text);
@@ -200,7 +235,7 @@
         document.getElementById("messages").appendChild(messageDiv);
         messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
       } catch (err) {
-        // Fallback
+        // Fallback for non-JSON messages (old clients, errors, etc.)
         const div = document.createElement("div");
         div.classList.add("message", "received");
         div.textContent = event.data;
@@ -234,9 +269,6 @@
         sendMessage();
       }
     };
-
-    // Fokus ke input saat halaman dibuka
-    document.getElementById("input").focus();
   </script>
 
 </body>
