@@ -16,7 +16,7 @@ type Message struct {
     Text     string `json:"text"`
 }
 
-var addr = flag.String("addr", ":8080", "http service address")
+var addr = flag.String("addr", ":10000", "http service address")
 
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
