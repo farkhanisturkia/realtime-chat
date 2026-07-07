@@ -197,7 +197,10 @@
     // ────────────────────────────────────────────────
     // WebSocket connection
     // ────────────────────────────────────────────────
-    const ws = new WebSocket("ws://" + location.host + "/ws?username=" + encodeURIComponent(username));
+    const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const wsUrl = wsProtocol + location.host + "/ws?username=" + encodeURIComponent(username);
+
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => {
       console.log("Connected as → " + username);
