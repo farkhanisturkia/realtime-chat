@@ -91,7 +91,7 @@
   </style>
 </head>
 <body>
-
+  <audio id="notif-sound" src="/static/notification.mp3" preload="auto"></audio>
   <form id="auth-container" onsubmit="handleAuth(event)">
     <h2 id="auth-title">Login MS Chat</h2>
     <input type="text" id="auth-username" placeholder="Username" required />
@@ -370,10 +370,14 @@
       const myName = MY_AUTHENTIC_USERNAME.toLowerCase();
       const sender = msg.username || "Anon";
       
+      let isIncoming = false;
+
       if (sender.toLowerCase() === myName) {
         messageDiv.classList.add("sent");
       } else {
         messageDiv.classList.add("received");
+        isIncoming = true;
+        
         const nameSpan = document.createElement("span");
         nameSpan.className = "username";
         nameSpan.textContent = sender;
@@ -384,6 +388,16 @@
       messageDiv.appendChild(textNode);
       messagesContainer.appendChild(messageDiv);
       messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
+
+      if (isIncoming) {
+        const sound = document.getElementById("notif-sound");
+        if (sound) {
+          sound.currentTime = 0;
+          sound.play().catch(err => {
+            console.log("Audio play diblokir oleh browser sampai ada interaksi klik:", err);
+          });
+        }
+      }
     }
 
     function sendMessage() {
