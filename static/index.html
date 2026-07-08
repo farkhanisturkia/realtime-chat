@@ -16,70 +16,56 @@
       align-items: center;
     }
 
+    #auth-container {
+      background: white; padding: 30px; border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15); width: 90%; max-width: 400px; text-align: center;
+    }
+    #auth-container h2 { margin-bottom: 20px; color: #111; font-weight: 700; }
+    #auth-container input {
+      width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ccc;
+      border-radius: 8px; outline: none; font-size: 0.95rem;
+    }
+    #auth-container button {
+      width: 100%; padding: 12px; background: #00a884; color: white; border: none;
+      border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 1rem;
+    }
+    #auth-container p { margin-top: 15px; font-size: 0.85rem; color: #54656f; }
+    #auth-container span { color: #00a884; font-weight: bold; cursor: pointer; }
+
     #app-container {
-      display: flex;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(255, 255, 255, 0.95);
-      position: relative;
-      overflow: hidden;
+      display: flex; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.95);
+      position: relative; overflow: hidden;
     }
 
     #sidebar {
-      width: 300px;
-      background: #f0f2f5;
-      border-right: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-      padding: 15px;
-      transition: transform 0.3s ease;
-      z-index: 10;
+      width: 300px; background: #f0f2f5; border-right: 1px solid #ddd;
+      display: flex; flex-direction: column; padding: 15px; transition: transform 0.3s ease; z-index: 10;
     }
     .profile-section { margin-bottom: 20px; }
     .profile-section label { font-size: 0.8rem; color: #666; font-weight: bold; }
     #username {
       width: 100%; padding: 8px 12px; border: 1px solid #ccc;
-      border-radius: 8px; margin-top: 5px; outline: none;
+      border-radius: 8px; margin-top: 5px; outline: none; background-color: #e9ecef; color: #495057;
     }
-    .room-controls {
-      display: flex; gap: 8px; margin-bottom: 15px;
-    }
-    .room-controls input {
-      flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 8px; outline: none;
-    }
-    .room-controls button {
-      padding: 8px 12px; background: #00a884; color: white; border: none;
-      border-radius: 8px; cursor: pointer; font-weight: bold;
-    }
+    .room-controls { display: flex; gap: 8px; margin-bottom: 15px; }
+    .room-controls input { flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 8px; outline: none; }
+    .room-controls button { padding: 8px 12px; background: #00a884; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
     .sidebar-title { font-size: 0.9rem; color: #54656f; font-weight: 600; margin-bottom: 10px; }
-    #room-list {
-      flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px;
-    }
+    #room-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
     .room-item {
       padding: 12px; background: white; border-radius: 8px; cursor: pointer;
-      display: flex; justify-content: space-between; align-items: center;
-      transition: background 0.2s; border: 1px solid #e1e1e1;
+      display: flex; justify-content: space-between; align-items: center; border: 1px solid #e1e1e1;
     }
-    .room-item:hover { background: #f5f6f6; }
     .room-item.active { background: #ffeecd; border-color: #ffbc42; }
     .room-name { font-weight: 600; color: #111; }
-    .btn-logout-room {
-      background: #ea0038; color: white; border: none; padding: 4px 8px;
-      border-radius: 4px; font-size: 0.75rem; cursor: pointer; display: none;
-    }
+    .btn-logout-room { background: #ea0038; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; display: none; }
     .room-item.active .btn-logout-room { display: block; }
+    .btn-logout-app { margin-top: 10px; padding: 10px; background: #ea0038; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
 
     #chat-main { flex: 1; display: flex; flex-direction: column; background: #efeae2; height: 100%; }
-    #chat-header {
-      background: #f0f2f5; padding: 15px; border-bottom: 1px solid #ddd;
-      display: flex; align-items: center; gap: 12px;
-    }
+    #chat-header { background: #f0f2f5; padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 12px; }
     #chat-header h3 { color: #111; font-size: 1.1rem; }
-
-    .menu-toggle {
-      background: none; border: none; font-size: 1.5rem; cursor: pointer; display: none; color: #54656f;
-    }
-
+    .menu-toggle { background: none; border: none; font-size: 1.5rem; cursor: pointer; display: none; color: #54656f; }
     #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 6px; }
     
     .message { max-width: 75%; padding: 8px 12px; border-radius: 8px; position: relative; font-size: 0.95rem; box-shadow: 0 1px 1px rgba(0,0,0,0.1); word-wrap: break-word; }
@@ -92,50 +78,41 @@
     #input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-size: 0.95rem; }
     #btn-send { width: 44px; height: 44px; background: #00a884; color: white; border: none; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
-    #sidebar-overlay {
-      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4); z-index: 5;
-    }
+    #sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 5; }
 
     @media (max-width: 768px) {
       .menu-toggle { display: block; }
-      #sidebar {
-        position: absolute; top: 0; left: 0; bottom: 0;
-        transform: translateX(-100%);
-      }
-      #sidebar.open {
-        transform: translateX(0);
-      }
-      #sidebar.open ~ #sidebar-overlay {
-        display: block;
-      }
-      .message { max-width: 85%; }
+      #sidebar { position: absolute; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
+      #sidebar.open { transform: translateX(0); }
+      #sidebar.open ~ #sidebar-overlay { display: block; }
     }
-
-    @media (min-width: 769px) {
-      #app-container {
-        width: 95vw; max-width: 1200px; height: 90vh; border-radius: 12px;
-      }
-    }
+    @media (min-width: 769px) { #app-container { width: 95vw; max-width: 1200px; height: 90vh; border-radius: 12px; } }
   </style>
 </head>
 <body>
 
-<div id="app-container">
+  <div id="auth-container">
+    <h2 id="auth-title">Login MS Chat</h2>
+    <input type="text" id="auth-username" placeholder="Username" required />
+    <input type="password" id="auth-password" placeholder="Password" required />
+    <button id="btn-auth-submit" onclick="handleAuth()">Masuk</button>
+    <p id="auth-toggle-text">Belum punya akun? <span onclick="toggleAuthMode()">Daftar disini</span></p>
+  </div>
+
+  <div id="app-container" style="display: none;">
     <div id="sidebar">
       <div class="profile-section">
         <label for="username">Username Anda</label>
-        <input id="username" type="text" placeholder="Nama..." />
+        <input id="username" type="text" readonly disabled />
       </div>
-
       <div class="sidebar-title">Cari / Buat Room</div>
       <div class="room-controls">
         <input id="room-input" type="text" placeholder="ID Room" />
         <button onclick="joinNewRoom()">Join</button>
       </div>
-
       <div class="sidebar-title">History Room Anda</div>
       <div id="room-list"></div>
+      <button class="btn-logout-app" onclick="logoutApp()">Logout Akun</button>
     </div>
 
     <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
@@ -145,9 +122,7 @@
         <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
         <h3 id="current-room-title">Pilih atau Masuk ke Room</h3>
       </div>
-      
       <div id="messages"></div>
-
       <div class="input-area">
         <input id="input" type="text" placeholder="Ketik pesan..." disabled />
         <button id="btn-send" onclick="sendMessage()" disabled>➤</button>
@@ -158,23 +133,111 @@
   <script>
     let ws = null;
     let currentRoomId = "";
+    let isRegisterMode = false;
+    let joinedRooms = [];
 
-    let joinedRooms = JSON.parse(localStorage.getItem("chat_rooms")) || ["general"];
-
+    let MY_AUTHENTIC_USERNAME = ""; 
     const usernameInput = document.getElementById("username");
-    if (!localStorage.getItem("chat_username")) {
-      localStorage.setItem("chat_username", "User_" + Math.floor(Math.random() * 1000));
-    }
-    usernameInput.value = localStorage.getItem("chat_username");
-    
-    usernameInput.onchange = () => {
-      if(usernameInput.value.trim()) {
-        localStorage.setItem("chat_username", usernameInput.value.trim());
-        if(currentRoomId) connectToRoom(currentRoomId);
-      }
-    };
 
-    renderRoomList();
+    function getUsernameFromJWT(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        return JSON.parse(jsonPayload).username;
+      } catch (e) {
+        return "";
+      }
+    }
+
+    function toggleAuthMode() {
+      isRegisterMode = !isRegisterMode;
+      document.getElementById("auth-title").textContent = isRegisterMode ? "Daftar Akun" : "Login MS Chat";
+      document.getElementById("btn-auth-submit").textContent = isRegisterMode ? "Daftar" : "Masuk";
+      document.getElementById("auth-toggle-text").innerHTML = isRegisterMode 
+        ? 'Sudah punya akun? <span onclick="toggleAuthMode()">Login disini</span>' 
+        : 'Belum punya akun? <span onclick="toggleAuthMode()">Daftar disini</span>';
+    }
+
+    async function handleAuth() {
+      const username = document.getElementById("auth-username").value.trim();
+      const password = document.getElementById("auth-password").value;
+      
+      if (!username || !password) return alert("Silakan isi semua kolom!");
+
+      const url = isRegisterMode ? "/api/register" : "/api/login";
+      
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        
+        const result = await response.json();
+        
+        if (!response.ok) {
+          alert(result.error || "Terjadi kesalahan!");
+          return;
+        }
+
+        localStorage.setItem("chat_token", result.token);
+        await fetchUserRooms(); 
+        showChatApp();
+        
+      } catch (err) {
+        alert("Gagal terhubung ke server.");
+      }
+    }
+
+    async function fetchUserRooms() {
+      const token = localStorage.getItem("chat_token");
+      if (!token) return;
+
+      try {
+        const response = await fetch("/api/rooms", {
+          method: "GET",
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+          logoutApp();
+          return;
+        }
+
+        const result = await response.json();
+        if (response.ok) {
+          joinedRooms = result.rooms || [];
+        }
+      } catch (e) {
+        console.error("Gagal memuat daftar room dari server", e);
+      }
+    }
+
+    async function showChatApp() {
+      const token = localStorage.getItem("chat_token");
+      MY_AUTHENTIC_USERNAME = getUsernameFromJWT(token);
+      
+      if (!MY_AUTHENTIC_USERNAME) {
+        logoutApp();
+        return;
+      }
+
+      await fetchUserRooms();
+
+      document.getElementById("auth-container").style.display = "none";
+      document.getElementById("app-container").style.removeProperty('display');
+      usernameInput.value = MY_AUTHENTIC_USERNAME;
+      renderRoomList();
+    }
+
+    function logoutApp() {
+      if (ws) ws.close();
+      localStorage.removeItem("chat_token");
+      location.reload();
+    }
 
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar");
@@ -184,7 +247,6 @@
     function renderRoomList() {
       const roomListContainer = document.getElementById("room-list");
       roomListContainer.innerHTML = "";
-
       joinedRooms.forEach(roomId => {
         const item = document.createElement("div");
         item.className = `room-item ${roomId === currentRoomId ? 'active' : ''}`;
@@ -194,14 +256,10 @@
         nameSpan.className = "room-name";
         nameSpan.textContent = `# ${roomId}`;
 
-        // Tombol Logout / Keluar dari Room
         const logoutBtn = document.createElement("button");
         logoutBtn.className = "btn-logout-room";
         logoutBtn.textContent = "Leave";
-        logoutBtn.onclick = (e) => {
-          e.stopPropagation();
-          leaveRoom(roomId);
-        };
+        logoutBtn.onclick = (e) => { e.stopPropagation(); leaveRoom(roomId); };
 
         item.appendChild(nameSpan);
         item.appendChild(logoutBtn);
@@ -209,18 +267,34 @@
       });
     }
 
-    function joinNewRoom() {
+    async function joinNewRoom() {
       const roomInput = document.getElementById("room-input");
       const roomId = roomInput.value.trim().toLowerCase();
       if (!roomId) return;
 
-      if (!joinedRooms.includes(roomId)) {
-        joinedRooms.push(roomId);
-        localStorage.setItem("chat_rooms", JSON.stringify(joinedRooms));
+      const token = localStorage.getItem("chat_token");
+      try {
+        const response = await fetch("/api/rooms/join", {
+          method: "POST",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ room_id: roomId })
+        });
+
+        if (response.ok) {
+          if (!joinedRooms.includes(roomId)) {
+            joinedRooms.push(roomId);
+          }
+          roomInput.value = "";
+          connectToRoom(roomId);
+        } else {
+          alert("Gagal join ke room!");
+        }
+      } catch (err) {
+        alert("Terjadi kesalahan sistem.");
       }
-      
-      roomInput.value = "";
-      connectToRoom(roomId);
     }
 
     function connectToRoom(roomId) {
@@ -233,32 +307,53 @@
       document.getElementById("btn-send").disabled = false;
 
       renderRoomList();
-
       document.getElementById("sidebar").classList.remove("open");
 
       const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-      const username = usernameInput.value.trim();
-      const wsUrl = `${wsProtocol}${location.host}/ws?username=${encodeURIComponent(username)}&room=${encodeURIComponent(roomId)}`;
+      const token = localStorage.getItem("chat_token");
+      const wsUrl = `${wsProtocol}${location.host}/ws?token=${encodeURIComponent(token)}&room=${encodeURIComponent(roomId)}`;
 
       ws = new WebSocket(wsUrl);
-      ws.onmessage = (event) => { displayMessage(JSON.parse(event.data)); };
+      ws.onmessage = (event) => { 
+        if (!event.data.trim()) return;
+        try { displayMessage(JSON.parse(event.data)); } catch (e) { console.error(e); }
+      };
+      
+      ws.onclose = (e) => {
+        if (e.code === 1006 || e.reason.includes("Unauthorized")) {
+          alert("Sesi tidak valid! Silakan login kembali.");
+          logoutApp();
+        }
+      };
     }
 
-    function leaveRoom(roomId) {
-      joinedRooms = joinedRooms.filter(r => r !== roomId);
-      localStorage.setItem("chat_rooms", JSON.stringify(joinedRooms));
+    async function leaveRoom(roomId) {
+      const token = localStorage.getItem("chat_token");
+      try {
+        const response = await fetch("/api/rooms/leave", {
+          method: "DELETE",
+          headers: { 
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ room_id: roomId })
+        });
 
-      if (currentRoomId === roomId) {
-        if (ws) ws.close();
-        ws = null;
-        currentRoomId = "";
-        document.getElementById("current-room-title").textContent = "Pilih atau Masuk ke Room";
-        document.getElementById("messages").innerHTML = "";
-        document.getElementById("input").disabled = true;
-        document.getElementById("btn-send").disabled = true;
+        if (response.ok) {
+          joinedRooms = joinedRooms.filter(r => r !== roomId);
+          if (currentRoomId === roomId) {
+            if (ws) ws.close();
+            ws = null; currentRoomId = "";
+            document.getElementById("current-room-title").textContent = "Pilih atau Masuk ke Room";
+            document.getElementById("messages").innerHTML = "";
+            document.getElementById("input").disabled = true;
+            document.getElementById("btn-send").disabled = true;
+          }
+          renderRoomList();
+        }
+      } catch (e) {
+        console.error("Gagal melakukan aksi leave room");
       }
-
-      renderRoomList();
     }
 
     function displayMessage(msg) {
@@ -266,7 +361,7 @@
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message");
 
-      const myName = usernameInput.value.trim().toLowerCase();
+      const myName = MY_AUTHENTIC_USERNAME.toLowerCase();
       const sender = msg.username || "Anon";
       
       if (sender.toLowerCase() === myName) {
@@ -282,18 +377,16 @@
       const textNode = document.createTextNode(msg.text);
       messageDiv.appendChild(textNode);
       messagesContainer.appendChild(messageDiv);
-      
       messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
     }
 
     function sendMessage() {
       const input = document.getElementById("input");
       const text = input.value.trim();
-
       if (text === "" || !ws || ws.readyState !== WebSocket.OPEN) return;
 
       const payload = {
-        username: usernameInput.value.trim(),
+        username: MY_AUTHENTIC_USERNAME,
         text: text,
         room_id: currentRoomId
       };
@@ -303,11 +396,11 @@
       input.focus();
     }
 
-    document.getElementById("input").onkeypress = (e) => {
-      if (e.key === "Enter") {
-        sendMessage();
-      }
-    };
+    document.getElementById("input").onkeypress = (e) => { if (e.key === "Enter") sendMessage(); };
+
+    if (localStorage.getItem("chat_token")) {
+      showChatApp();
+    }
   </script>
 </body>
 </html>

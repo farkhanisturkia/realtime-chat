@@ -20,7 +20,7 @@ type Client struct {
 	conn     *websocket.Conn
 	send     chan []byte
 	username string
-	roomId   string 
+	roomId   string
 }
 
 func (c *Client) readPump() {
@@ -50,7 +50,8 @@ func (c *Client) readPump() {
 			msg = Message{Username: c.username, Text: string(message), RoomId: c.roomId}
 		}
 
-		msg.RoomId = c.roomId 
+		msg.Username = c.username
+		msg.RoomId = c.roomId
 
 		if msg.Text == "" {
 			continue
@@ -69,7 +70,7 @@ func (c *Client) writePump() {
 	}()
 
 	rows, err := c.hub.db.Query(
-		"SELECT username, message, room_id FROM chat_history WHERE room_id = ? ORDER BY id DESC LIMIT 50", 
+		"SELECT username, message, room_id FROM chat_history WHERE room_id = ? ORDER BY id DESC LIMIT 50",
 		c.roomId,
 	)
 	if err == nil {
@@ -90,7 +91,6 @@ func (c *Client) writePump() {
 			}
 		}
 	}
-	// ────────────────────────────────────────────────────────
 
 	for {
 		select {

@@ -46,7 +46,7 @@ func (h *Hub) Run() {
 				}
 				if len(clients) == 0 {
 					delete(h.rooms, client.roomId)
-				}
+                }
 			}
 			h.mu.Unlock()
 
@@ -57,7 +57,7 @@ func (h *Hub) Run() {
 			}
 
 			_, err := h.db.Exec(
-				"INSERT INTO chat_history (room_id, username, message) VALUES (?, ?, ?)", 
+				"INSERT INTO chat_history (room_id, username, message) VALUES (?, ?, ?)",
 				msg.RoomId, msg.Username, msg.Text,
 			)
 			if err != nil {
