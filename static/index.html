@@ -72,7 +72,7 @@
     .room-item.active .btn-logout-room { display: block; }
     .btn-logout-app { margin-top: 10px; padding: 10px; background: #ea0038; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
 
-    #chat-main { flex: 1; display: flex; flex-direction: column; background: #efeae2; height: 100%; }
+    #chat-main { flex: 1; display: flex; flex-direction: column; background: #efeae2; height: 100%; position: relative; }
     #chat-header { background: #f0f2f5; padding: 15px; border-bottom: 1px solid #ddd; display: flex; align-items: center; gap: 12px; }
     #chat-header h3 { color: #111; font-size: 1.1rem; }
     .menu-toggle { background: none; border: none; font-size: 1.5rem; cursor: pointer; display: none; color: #54656f; }
@@ -84,14 +84,54 @@
     .message .username { font-weight: bold; font-size: 0.8rem; color: #00a884; margin-bottom: 3px; display: block; }
     .message.sent .username { display: none; }
 
-    .input-area { background: #f0f2f5; padding: 12px; display: flex; align-items: center; gap: 10px; }
+    .input-area { background: #f0f2f5; padding: 12px; display: flex; align-items: center; gap: 10px; position: relative; }
+    
+    .textarea-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 12px;
+    }
 
     #input { 
-      flex: 1; padding: 10px 15px; border: 1px solid #ccc; border-radius: 12px; 
+      flex: 1; padding: 10px 45px 10px 15px; border: none; background: transparent;
       outline: none; font-size: 0.95rem; resize: none; height: 44px; 
       font-family: inherit; line-height: 1.4;
     }
+
+    .btn-emoji {
+      position: absolute; right: 12px; background: none; border: none;
+      font-size: 1.3rem; cursor: pointer; outline: none; user-select: none;
+    }
+    .btn-emoji:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .emoji-picker {
+      position: absolute; 
+      bottom: 65px; 
+      right: 65px; 
+      width: 320px;
+      max-height: 250px;
+      background: white; 
+      border: 1px solid #ccc; 
+      border-radius: 8px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+      display: none; 
+      flex-wrap: wrap;
+      padding: 10px; 
+      overflow-y: auto;
+      gap: 10px; 
+      z-index: 100;
+    }
+    .emoji-item {
+      font-size: 1.3rem; cursor: pointer; user-select: none; transition: transform 0.1s ease;
+    }
+    .emoji-item:hover { transform: scale(1.2); }
+
     #btn-send { width: 44px; height: 44px; background: #00a884; color: white; border: none; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    #btn-send:disabled { opacity: 0.6; cursor: not-allowed; }
 
     #sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 5; }
 
@@ -100,6 +140,7 @@
       #sidebar { position: absolute; top: 0; left: 0; bottom: 0; transform: translateX(-100%); }
       #sidebar.open { transform: translateX(0); }
       #sidebar.open ~ #sidebar-overlay { display: block; }
+      .emoji-picker { right: 15px; bottom: 65px; }
     }
     @media (min-width: 769px) { #app-container { width: 95vw; max-width: 1200px; height: 90vh; border-radius: 12px; } }
   </style>
@@ -139,8 +180,14 @@
         <h3 id="current-room-title">Pilih atau Masuk ke Room</h3>
       </div>
       <div id="messages"></div>
+      
+      <div id="emoji-picker" class="emoji-picker"></div>
+
       <div class="input-area">
-        <textarea id="input" placeholder="Ketik pesan..." disabled></textarea>
+        <div class="textarea-wrapper">
+          <textarea id="input" placeholder="Ketik pesan..." disabled></textarea>
+          <button id="btn-emoji" class="btn-emoji" onclick="toggleEmojiPicker()" disabled>😊</button>
+        </div>
         <button id="btn-send" onclick="sendMessage()" disabled>➤</button>
       </div>
     </div>
@@ -155,6 +202,81 @@
 
     let MY_AUTHENTIC_USERNAME = ""; 
     const usernameInput = document.getElementById("username");
+
+    const emojiList = [
+      // 1. Smileys & People (Ekspresi & Wajah)
+      "😊", "😂", "🤣", "😁", "😀", "😄", "😅", "😆", "😉", "😍", 
+      "🥰", "😘", "😗", "😚", "😋", "😛", "😝", "😜", "🤪", "😎", 
+      "🤓", "🧐", "🥳", "🤩", "😏", "😒", "😞", "😔", "😟", "😕", 
+      "🙁", "☹️", "😣", "😖", "😫", "😩", "🥺", "😢", "😭", "😤", 
+      "😠", "😡", "🤬", "🤯", "😳", "🥵", "🥶", "😱", "😨", "😰", 
+      "😥", "😓", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", 
+      "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", 
+      "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "💩", 
+      "🤡", "👻", "💀", "👽", "🤖",
+
+      // 2. Hands & Gestures (Tangan & Isyarat)
+      "👍", "👎", "👌", "🤌", "✊", "✋", "✌️", "🤞", "🤟", "🤘", 
+      "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👋", "🤚", 
+      "🖐️", "🖖", "👏", "🙌", "🙏", "🤝", "💪", "✍️", "🤳", "💅",
+
+      // 3. Love & Hearts (Cinta & Simbol Hati)
+      "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", 
+      "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟",
+
+      // 4. Celebrations & Sparks (Perayaan & Efek)
+      "🔥", "🚀", "✨", "🎉", "🎊", "🥳", "💥", "⭐", "🌟", "💫", 
+      "🎈", "🎀", "🎁", "🎫", "🏆", "💯", "💢", "💠",
+
+      // 5. Office, Tech & Communication (Kerja, IT & Komunikasi)
+      "💻", "🖥️", "🖨️", "⌨️", "🖱️", "📱", "☎️", "📞", "📟", "📠", 
+      "💾", "💿", "📀", "🎥", "🎬", "📺", "📷", "📸", "📹", "📼", 
+      "🔍", "🔎", "💡", "🔦", "🏮", "🏮", "🧱", "⚙️", "🛠️", "⚒️", 
+      "🔧", "🔩", "⚖️", "🔗", "⛓️", "🧰", "🛡️", "🔑", "🗝️", "💬", 
+      "👁️‍🗨️", "🗯️", "💭", "📢", "📣", "🔔", "🔕", "📝", "🗒️", "🗓️", 
+      "📅", "📈", "📉", "📊", "📋", "📌", "📍", "📎", "🖇️", "📏", 
+      "📐", "📐", "✂️", "🔒", "🔓", "🔏", "🔐", "📦", "📫", "📦", 
+      "🏢", "🏪", "🏫", "🏛️", "🏢",
+
+      // 6. Signs & Status (Tanda, Ceklis & Peringatan)
+      "✅", "❌", "⚠️", "🚫", "⭕", "❌", "❓", "❔", "❗", "❕", 
+      "➕", "➖", "✖️", "➗", "🟪", "🟦", "🟥", "🟧", "🟨", "🟩"
+    ];
+
+    function initEmojiPicker() {
+      const picker = document.getElementById("emoji-picker");
+      picker.innerHTML = "";
+      emojiList.forEach(emoji => {
+        const span = document.createElement("span");
+        span.className = "emoji-item";
+        span.textContent = emoji;
+        span.onclick = () => insertEmoji(emoji);
+        picker.appendChild(span);
+      });
+    }
+
+    function toggleEmojiPicker() {
+      const picker = document.getElementById("emoji-picker");
+      if (picker.style.display === "flex") {
+        picker.style.display = "none";
+      } else {
+        picker.style.display = "flex";
+      }
+    }
+
+    function insertEmoji(emoji) {
+      const input = document.getElementById("input");
+      input.value += emoji;
+      input.focus();
+    }
+
+    document.addEventListener("click", (e) => {
+      const picker = document.getElementById("emoji-picker");
+      const btnEmoji = document.getElementById("btn-emoji");
+      if (picker && btnEmoji && !picker.contains(e.target) && e.target !== btnEmoji) {
+        picker.style.display = "none";
+      }
+    });
 
     function getUsernameFromJWT(token) {
       try {
@@ -253,6 +375,7 @@
       document.getElementById("app-container").style.removeProperty('display');
       usernameInput.value = MY_AUTHENTIC_USERNAME;
       renderRoomList();
+      initEmojiPicker();
     }
 
     function logoutApp() {
@@ -343,6 +466,7 @@
       document.getElementById("current-room-title").textContent = `Room: # ${roomId}`;
       document.getElementById("messages").innerHTML = "";
       document.getElementById("input").disabled = false;
+      document.getElementById("btn-emoji").disabled = false;
       document.getElementById("btn-send").disabled = false;
 
       renderRoomList();
@@ -387,6 +511,7 @@
             document.getElementById("current-room-title").textContent = "Pilih atau Masuk ke Room";
             document.getElementById("messages").innerHTML = "";
             document.getElementById("input").disabled = true;
+            document.getElementById("btn-emoji").disabled = true;
             document.getElementById("btn-send").disabled = true;
           }
           renderRoomList();
@@ -467,6 +592,7 @@
       ws.send(JSON.stringify(payload));
       input.value = "";
       input.focus();
+      document.getElementById("emoji-picker").style.display = "none";
     }
 
     const msgInput = document.getElementById("input");
