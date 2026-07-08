@@ -10,10 +10,11 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
       background: #e5ddd5;
       background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
-      height: 100vh;
+      height: 100dvh;
       display: flex;
       justify-content: center;
       align-items: center;
+      overflow: hidden;
     }
 
     #auth-container {
@@ -33,7 +34,7 @@
     #auth-container span { color: #00a884; font-weight: bold; cursor: pointer; }
 
     #app-container {
-      display: flex; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.95);
+      display: flex; width: 100vw; height: 100dvh; background: rgba(255, 255, 255, 0.95);
       position: relative; overflow: hidden;
     }
 
@@ -91,13 +92,13 @@
 </head>
 <body>
 
-  <div id="auth-container">
+  <form id="auth-container" onsubmit="handleAuth(event)">
     <h2 id="auth-title">Login MS Chat</h2>
     <input type="text" id="auth-username" placeholder="Username" required />
     <input type="password" id="auth-password" placeholder="Password" required />
-    <button id="btn-auth-submit" onclick="handleAuth()">Masuk</button>
+    <button type="submit" id="btn-auth-submit">Masuk</button>
     <p id="auth-toggle-text">Belum punya akun? <span onclick="toggleAuthMode()">Daftar disini</span></p>
-  </div>
+  </form>
 
   <div id="app-container" style="display: none;">
     <div id="sidebar">
@@ -161,7 +162,9 @@
         : 'Belum punya akun? <span onclick="toggleAuthMode()">Daftar disini</span>';
     }
 
-    async function handleAuth() {
+    async function handleAuth(e) {
+      if (e) e.preventDefault();
+
       const username = document.getElementById("auth-username").value.trim();
       const password = document.getElementById("auth-password").value;
       
@@ -182,6 +185,9 @@
           alert(result.error || "Terjadi kesalahan!");
           return;
         }
+
+        document.getElementById("auth-username").value = "";
+        document.getElementById("auth-password").value = "";
 
         localStorage.setItem("chat_token", result.token);
         await fetchUserRooms(); 
