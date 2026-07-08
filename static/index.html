@@ -85,7 +85,12 @@
     .message.sent .username { display: none; }
 
     .input-area { background: #f0f2f5; padding: 12px; display: flex; align-items: center; gap: 10px; }
-    #input { flex: 1; padding: 12px; border: 1px solid #ccc; border-radius: 20px; outline: none; font-size: 0.95rem; }
+
+    #input { 
+      flex: 1; padding: 10px 15px; border: 1px solid #ccc; border-radius: 12px; 
+      outline: none; font-size: 0.95rem; resize: none; height: 44px; 
+      font-family: inherit; line-height: 1.4;
+    }
     #btn-send { width: 44px; height: 44px; background: #00a884; color: white; border: none; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 
     #sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 5; }
@@ -135,7 +140,7 @@
       </div>
       <div id="messages"></div>
       <div class="input-area">
-        <input id="input" type="text" placeholder="Ketik pesan..." disabled />
+        <textarea id="input" placeholder="Ketik pesan..." disabled></textarea>
         <button id="btn-send" onclick="sendMessage()" disabled>➤</button>
       </div>
     </div>
@@ -425,8 +430,11 @@
         messageDiv.appendChild(nameSpan);
       }
 
-      const textNode = document.createTextNode(msg.text);
-      messageDiv.appendChild(textNode);
+      const textContentSpan = document.createElement("span");
+      const formattedText = (msg.text || "").replace(/\n/g, "<br/>");
+      textContentSpan.innerHTML = formattedText;
+      
+      messageDiv.appendChild(textContentSpan);
       messagesContainer.appendChild(messageDiv);
       messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
 
@@ -461,7 +469,13 @@
       input.focus();
     }
 
-    document.getElementById("input").onkeypress = (e) => { if (e.key === "Enter") sendMessage(); };
+    const msgInput = document.getElementById("input");
+    msgInput.onkeydown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    };
 
     if (localStorage.getItem("chat_token")) {
       showChatApp();
