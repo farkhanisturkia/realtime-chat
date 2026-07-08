@@ -53,12 +53,21 @@
     .room-controls button { padding: 8px 12px; background: #00a884; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
     .sidebar-title { font-size: 0.9rem; color: #54656f; font-weight: 600; margin-bottom: 10px; }
     #room-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 5px; }
+    
     .room-item {
       padding: 12px; background: white; border-radius: 8px; cursor: pointer;
       display: flex; justify-content: space-between; align-items: center; border: 1px solid #e1e1e1;
     }
     .room-item.active { background: #ffeecd; border-color: #ffbc42; }
+    .room-info { display: flex; align-items: center; gap: 8px; }
     .room-name { font-weight: 600; color: #111; }
+
+    .room-badge {
+      background: #00a884; color: white; border-radius: 50%; min-width: 20px; height: 20px;
+      padding: 0 6px; font-size: 0.75rem; font-weight: bold; display: flex; align-items: center; justify-content: center;
+    }
+    
+    .room-actions { display: flex; align-items: center; gap: 6px; }
     .btn-logout-room { background: #ea0038; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; cursor: pointer; display: none; }
     .room-item.active .btn-logout-room { display: block; }
     .btn-logout-app { margin-top: 10px; padding: 10px; background: #ea0038; color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 0.9rem; }
@@ -92,6 +101,7 @@
 </head>
 <body>
   <audio id="notif-sound" src="/static/notification.mp3" preload="auto"></audio>
+  
   <form id="auth-container" onsubmit="handleAuth(event)">
     <h2 id="auth-title">Login MS Chat</h2>
     <input type="text" id="auth-username" placeholder="Username" required />
@@ -136,6 +146,7 @@
     let currentRoomId = "";
     let isRegisterMode = false;
     let joinedRooms = [];
+    let unreadCounts = {}; 
 
     let MY_AUTHENTIC_USERNAME = ""; 
     const usernameInput = document.getElementById("username");
@@ -258,17 +269,32 @@
         item.className = `room-item ${roomId === currentRoomId ? 'active' : ''}`;
         item.onclick = () => connectToRoom(roomId);
 
+        const infoDiv = document.createElement("div");
+        infoDiv.className = "room-info";
+
         const nameSpan = document.createElement("span");
         nameSpan.className = "room-name";
         nameSpan.textContent = `# ${roomId}`;
+        infoDiv.appendChild(nameSpan);
+
+        if (unreadCounts[roomId] && unreadCounts[roomId] > 0 && roomId !== currentRoomId) {
+          const badge = document.createElement("span");
+          badge.className = "room-badge";
+          badge.textContent = unreadCounts[roomId];
+          infoDiv.appendChild(badge);
+        }
+
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "room-actions";
 
         const logoutBtn = document.createElement("button");
         logoutBtn.className = "btn-logout-room";
         logoutBtn.textContent = "Leave";
         logoutBtn.onclick = (e) => { e.stopPropagation(); leaveRoom(roomId); };
+        actionsDiv.appendChild(logoutBtn);
 
-        item.appendChild(nameSpan);
-        item.appendChild(logoutBtn);
+        item.appendChild(infoDiv);
+        item.appendChild(actionsDiv);
         roomListContainer.appendChild(item);
       });
     }
@@ -307,6 +333,8 @@
       if (ws) { ws.close(); }
 
       currentRoomId = roomId;
+      unreadCounts[roomId] = 0;
+
       document.getElementById("current-room-title").textContent = `Room: # ${roomId}`;
       document.getElementById("messages").innerHTML = "";
       document.getElementById("input").disabled = false;
@@ -347,6 +375,7 @@
 
         if (response.ok) {
           joinedRooms = joinedRooms.filter(r => r !== roomId);
+          delete unreadCounts[roomId];
           if (currentRoomId === roomId) {
             if (ws) ws.close();
             ws = null; currentRoomId = "";
@@ -364,6 +393,18 @@
 
     function displayMessage(msg) {
       const messagesContainer = document.getElementById("messages");
+      const targetRoom = msg.room_id || currentRoomId;
+
+      if (targetRoom !== currentRoomId) {
+        const sender = msg.username || "Anon";
+        if (sender.toLowerCase() !== MY_AUTHENTIC_USERNAME.toLowerCase() && !msg.is_history) {
+          unreadCounts[targetRoom] = (unreadCounts[targetRoom] || 0) + 1;
+          renderRoomList();
+          playNotifSound();
+        }
+        return; 
+      }
+
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message");
 
@@ -389,14 +430,18 @@
       messagesContainer.appendChild(messageDiv);
       messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
 
-      if (isIncoming) {
-        const sound = document.getElementById("notif-sound");
-        if (sound) {
-          sound.currentTime = 0;
-          sound.play().catch(err => {
-            console.log("Audio play diblokir oleh browser sampai ada interaksi klik:", err);
-          });
-        }
+      if (isIncoming && !msg.is_history) {
+        playNotifSound();
+      }
+    }
+
+    function playNotifSound() {
+      const sound = document.getElementById("notif-sound");
+      if (sound) {
+        sound.currentTime = 0;
+        sound.play().catch(err => {
+          console.log("Audio ditahan aturan interaksi browser:", err);
+        });
       }
     }
 

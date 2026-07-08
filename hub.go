@@ -46,7 +46,7 @@ func (h *Hub) Run() {
 				}
 				if len(clients) == 0 {
 					delete(h.rooms, client.roomId)
-                }
+				}
 			}
 			h.mu.Unlock()
 
@@ -64,14 +64,34 @@ func (h *Hub) Run() {
 				log.Println("Gagal menyimpan chat ke SQLite:", err)
 			}
 
+			msg.IsHistory = false
+			payloadBytes, _ := json.Marshal(msg)
+
+			rows, err := h.db.Query("SELECT username FROM user_rooms WHERE room_id = ?", msg.RoomId)
+			if err != nil {
+				log.Println("Gagal mengambil data user_rooms:", err)
+				continue
+			}
+
+			joinedUsers := make(map[string]bool)
+			for rows.Next() {
+				var u string
+				if err := rows.Scan(&u); err == nil {
+					joinedUsers[u] = true
+				}
+			}
+			rows.Close()
+
 			h.mu.RLock()
-			if clients, ok := h.rooms[msg.RoomId]; ok {
+			for _, clients := range h.rooms {
 				for client := range clients {
-					select {
-					case client.send <- messageBytes:
-					default:
-						close(client.send)
-						delete(clients, client)
+					if joinedUsers[client.username] {
+						select {
+						case client.send <- payloadBytes:
+						default:
+							close(client.send)
+							delete(clients, client)
+						}
 					}
 				}
 			}

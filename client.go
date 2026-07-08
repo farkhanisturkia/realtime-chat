@@ -78,6 +78,7 @@ func (c *Client) writePump() {
 		for rows.Next() {
 			var msg Message
 			if err := rows.Scan(&msg.Username, &msg.Text, &msg.RoomId); err == nil {
+				msg.IsHistory = true
 				history = append(history, msg)
 			}
 		}

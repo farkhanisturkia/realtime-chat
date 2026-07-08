@@ -17,9 +17,10 @@ import (
 var jwtSecret = []byte("MS_CHAT_SUPER_SECRET_KEY_2026")
 
 type Message struct {
-	Username string `json:"username"`
-	Text     string `json:"text"`
-	RoomId   string `json:"room_id"`
+	Username  string `json:"username"`
+	Text      string `json:"text"`
+	RoomId    string `json:"room_id"`
+	IsHistory bool   `json:"is_history"`
 }
 
 type AuthRequest struct {
@@ -152,25 +153,25 @@ func main() {
 	defer db.Close()
 
 	query := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL UNIQUE,
-		password TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);
-	CREATE TABLE IF NOT EXISTS chat_history (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		room_id TEXT NOT NULL,
-		username TEXT NOT NULL,
-		message TEXT NOT NULL,
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);
-	CREATE TABLE IF NOT EXISTS user_rooms (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		username TEXT NOT NULL,
-		room_id TEXT NOT NULL,
-		UNIQUE(username, room_id)
-	);`
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL UNIQUE,
+        password TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS chat_history (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        room_id TEXT NOT NULL,
+        username TEXT NOT NULL,
+        message TEXT NOT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE TABLE IF NOT EXISTS user_rooms (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT NOT NULL,
+        room_id TEXT NOT NULL,
+        UNIQUE(username, room_id)
+    );`
 	if _, err := db.Exec(query); err != nil {
 		log.Fatal("Gagal membuat tabel database:", err)
 	}
@@ -179,84 +180,89 @@ func main() {
 	go hub.Run()
 
 	r := gin.Default()
-    r.POST("/api/register", func(c *gin.Context) {
-        var req AuthRequest
-        if err := c.ShouldBindJSON(&req); err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "Input tidak valid"})
-            return
-        }
 
-        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal memproses password"})
-            return
-        }
+	r.GET("/favicon.ico", func(c *gin.Context) {
+		c.Status(http.StatusNoContent)
+	})
 
-        tx, err := db.Begin()
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-            return
-        }
+	r.POST("/api/register", func(c *gin.Context) {
+		var req AuthRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Input tidak valid"})
+			return
+		}
 
-        _, err = tx.Exec("INSERT INTO users (username, password) VALUES (?, ?)", req.Username, string(hashedPassword))
-        if err != nil {
-            tx.Rollback()
-            c.JSON(http.StatusConflict, gin.H{"error": "Username sudah terdaftar!"})
-            return
-        }
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal memproses password"})
+			return
+		}
 
-        _, _ = tx.Exec("INSERT INTO user_rooms (username, room_id) VALUES (?, 'general')", req.Username)
-        
-        if err := tx.Commit(); err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan data"})
-            return
-        }
+		tx, err := db.Begin()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			return
+		}
 
-        token, err := generateToken(req.Username)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Registrasi sukses, tetapi gagal membuat sesi login"})
-            return
-        }
+		_, err = tx.Exec("INSERT INTO users (username, password) VALUES (?, ?)", req.Username, string(hashedPassword))
+		if err != nil {
+			tx.Rollback()
+			c.JSON(http.StatusConflict, gin.H{"error": "Username sudah terdaftar!"})
+			return
+		}
 
-        c.JSON(http.StatusOK, gin.H{
-            "message":  "Registrasi dan login berhasil",
-            "username": req.Username,
-            "token":    token,
-        })
-    })
+		_, _ = tx.Exec("INSERT INTO user_rooms (username, room_id) VALUES (?, 'general')", req.Username)
 
-    r.POST("/api/login", func(c *gin.Context) {
-        var req AuthRequest
-        if err := c.ShouldBindJSON(&req); err != nil {
-            c.JSON(http.StatusBadRequest, gin.H{"error": "Input tidak valid"})
-            return
-        }
+		if err := tx.Commit(); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal menyimpan data"})
+			return
+		}
 
-        var dbPassword string
-        err := db.QueryRow("SELECT password FROM users WHERE username = ?", req.Username).Scan(&dbPassword)
-        if err != nil {
-            c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
-            return
-        }
+		token, err := generateToken(req.Username)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Registrasi sukses, tetapi gagal membuat sesi login"})
+			return
+		}
 
-        err = bcrypt.CompareHashAndPassword([]byte(dbPassword), []byte(req.Password))
-        if err != nil {
-            c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
-            return
-        }
+		c.JSON(http.StatusOK, gin.H{
+			"message":  "Registrasi dan login berhasil",
+			"username": req.Username,
+			"token":    token,
+		})
+	})
 
-        token, err := generateToken(req.Username)
-        if err != nil {
-            c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat sesi login"})
-            return
-        }
+	r.POST("/api/login", func(c *gin.Context) {
+		var req AuthRequest
+		if err := c.ShouldBindJSON(&req); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Input tidak valid"})
+			return
+		}
 
-        c.JSON(http.StatusOK, gin.H{
-            "message":  "Login berhasil",
-            "username": req.Username,
-            "token":    token,
-        })
-    })
+		var dbPassword string
+		err := db.QueryRow("SELECT password FROM users WHERE username = ?", req.Username).Scan(&dbPassword)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
+			return
+		}
+
+		err = bcrypt.CompareHashAndPassword([]byte(dbPassword), []byte(req.Password))
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Username atau password salah"})
+			return
+		}
+
+		token, err := generateToken(req.Username)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Gagal membuat sesi login"})
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{
+			"message":  "Login berhasil",
+			"username": req.Username,
+			"token":    token,
+		})
+	})
 
 	authorized := r.Group("/api")
 	authorized.Use(AuthMiddleware(db))
