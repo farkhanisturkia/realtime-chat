@@ -1,29 +1,29 @@
 package main
 
 import (
-	"database/sql"
-	"encoding/json"
-	"log"
-	"sync"
+    "database/sql"
+    "encoding/json"
+    "log"
+    "sync"
 )
 
 type Hub struct {
-	rooms      map[string]map[*Client]bool
-	broadcast  chan []byte
-	register   chan *Client
-	unregister chan *Client
-	db         *sql.DB
-	mu         sync.RWMutex
+    rooms      map[string]map[*Client]bool
+    broadcast  chan []byte
+    register   chan *Client
+    unregister chan *Client
+    db         *sql.DB
+    mu         sync.RWMutex
 }
 
 func NewHub(db *sql.DB) *Hub {
-	return &Hub{
-		rooms:      make(map[string]map[*Client]bool),
-		broadcast:  make(chan []byte, 256),
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		db:         db,
-	}
+    return &Hub{
+        rooms:      make(map[string]map[*Client]bool),
+        broadcast:  make(chan []byte, 256),
+        register:   make(chan *Client),
+        unregister: make(chan *Client),
+        db:         db,
+    }
 }
 
 func (h *Hub) Run() {

@@ -97,7 +97,7 @@
     }
 
     #input { 
-      flex: 1; padding: 10px 45px 10px 15px; border: none; background: transparent;
+      flex: 1; padding: 10px 75px 10px 15px; border: none; background: transparent;
       outline: none; font-size: 0.95rem; resize: none; height: 44px; 
       font-family: inherit; line-height: 1.4;
     }
@@ -185,12 +185,21 @@
 
       <div class="input-area">
         <div class="textarea-wrapper">
+          <input type="file" id="file-input" style="display: none;" onchange="handleFileUpload()" />
+          <button id="btn-upload" class="btn-emoji" style="right: 45px;" onclick="document.getElementById('file-input').click()" disabled>📎</button>
+          
           <textarea id="input" placeholder="Ketik pesan..." disabled></textarea>
           <button id="btn-emoji" class="btn-emoji" onclick="toggleEmojiPicker()" disabled>😊</button>
         </div>
         <button id="btn-send" onclick="sendMessage()" disabled>➤</button>
       </div>
     </div>
+  </div>
+  <div id="media-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column;">
+    <span onclick="closeMediaModal()" style="position: absolute; top: 20px; right: 30px; color: white; font-size: 2.5rem; font-weight: bold; cursor: pointer; user-select: none;">&times;</span>
+    <div id="modal-content" style="max-width: 90%; max-height: 80%; display: flex; justify-content: center; align-items: center;">
+      </div>
+    <div id="modal-caption" style="color: #ccc; margin-top: 15px; font-size: 1rem; text-align: center; word-break: break-all; padding: 0 20px;"></div>
   </div>
 
   <script>
@@ -204,7 +213,6 @@
     const usernameInput = document.getElementById("username");
 
     const emojiList = [
-      // 1. Smileys & People (Ekspresi & Wajah)
       "😊", "😂", "🤣", "😁", "😀", "😄", "😅", "😆", "😉", "😍", 
       "🥰", "😘", "😗", "😚", "😋", "😛", "😝", "😜", "🤪", "😎", 
       "🤓", "🧐", "🥳", "🤩", "😏", "😒", "😞", "😔", "😟", "😕", 
@@ -213,35 +221,30 @@
       "😥", "😓", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", 
       "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", 
       "😵", "🤐", "🥴", "🤢", "🤮", "🤧", "😷", "🤒", "🤕", "💩", 
-      "🤡", "👻", "💀", "👽", "🤖",
-
-      // 2. Hands & Gestures (Tangan & Isyarat)
-      "👍", "👎", "👌", "🤌", "✊", "✋", "✌️", "🤞", "🤟", "🤘", 
-      "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👋", "🤚", 
-      "🖐️", "🖖", "👏", "🙌", "🙏", "🤝", "💪", "✍️", "🤳", "💅",
-
-      // 3. Love & Hearts (Cinta & Simbol Hati)
-      "❤️", "🧡", "💛", "💚", "💙", "💜", "🖤", "🤍", "🤎", "💔", 
-      "❣️", "💕", "💞", "💓", "💗", "💖", "💘", "💝", "💟",
-
-      // 4. Celebrations & Sparks (Perayaan & Efek)
-      "🔥", "🚀", "✨", "🎉", "🎊", "🥳", "💥", "⭐", "🌟", "💫", 
-      "🎈", "🎀", "🎁", "🎫", "🏆", "💯", "💢", "💠",
-
-      // 5. Office, Tech & Communication (Kerja, IT & Komunikasi)
+      "🤡", "👻", "💀", "👽", "🤖", "👍", "👎", "👌", "🤌", "✊", 
+      "✋", "✌️", "🤞", "🤟", "🤘", "🤙", "👈", "👉", "👆", "🖕", 
+      "👇", "☝️", "👋", "🤚", "🖐️", "🖖", "👏", "🙌", "🙏", "🤝", 
+      "💪", "✍️", "🤳", "💅", "❤️", "🧡", "💛", "💚", "💙", "💜", 
+      "🖤", "🤍", "🤎", "💔", "❣️", "💕", "💞", "💓", "💗", "💖", 
+      "💘", "💝", "💟", "🔥", "🚀", "✨", "🎉", "🎊", "💥", "⭐", 
+      "🌟", "💫", "🎈", "🎀", "🎁", "🎫", "🏆", "💯", "¼", "💠", 
       "💻", "🖥️", "🖨️", "⌨️", "🖱️", "📱", "☎️", "📞", "📟", "📠", 
       "💾", "💿", "📀", "🎥", "🎬", "📺", "📷", "📸", "📹", "📼", 
-      "🔍", "🔎", "💡", "🔦", "🏮", "🏮", "🧱", "⚙️", "🛠️", "⚒️", 
-      "🔧", "🔩", "⚖️", "🔗", "⛓️", "🧰", "🛡️", "🔑", "🗝️", "💬", 
-      "👁️‍🗨️", "🗯️", "💭", "📢", "📣", "🔔", "🔕", "📝", "🗒️", "🗓️", 
-      "📅", "📈", "📉", "📊", "📋", "📌", "📍", "📎", "🖇️", "📏", 
-      "📐", "📐", "✂️", "🔒", "🔓", "🔏", "🔐", "📦", "📫", "📦", 
-      "🏢", "🏪", "🏫", "🏛️", "🏢",
-
-      // 6. Signs & Status (Tanda, Ceklis & Peringatan)
-      "✅", "❌", "⚠️", "🚫", "⭕", "❌", "❓", "❔", "❗", "❕", 
+      "🔍", "🔎", "💡", "🔦", "🏮", "🧱", "⚙️", "🛠️", "⚒️", "🔧", 
+      "🔩", "⚖️", "🔗", "⛓️", "🧰", "🛡️", "🔑", "🗝️", "💬", "👁️‍🗨️", 
+      "🗯️", "💭", "📢", "📣", "🔔", "🔕", "📝", "🗒️", "🗓️", "📅", 
+      "📈", "📉", "📊", "📋", "📌", "📍", "📎", "🖇️", "📏", "📐", 
+      "✂️", "🔒", "🔓", "🔏", "🔐", "📦", "📫", "🏢", "🏪", "🏫", 
+      "🏛️", "✅", "❌", "⚠️", "🚫", "⭕", "❓", "❔", "❗", "❕", 
       "➕", "➖", "✖️", "➗", "🟪", "🟦", "🟥", "🟧", "🟨", "🟩"
     ];
+
+    function requestNotificationPermission() {
+      if (!("Notification" in window)) return;
+      if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+      }
+    }
 
     function initEmojiPicker() {
       const picker = document.getElementById("emoji-picker");
@@ -257,11 +260,7 @@
 
     function toggleEmojiPicker() {
       const picker = document.getElementById("emoji-picker");
-      if (picker.style.display === "flex") {
-        picker.style.display = "none";
-      } else {
-        picker.style.display = "flex";
-      }
+      picker.style.display = picker.style.display === "flex" ? "none" : "flex";
     }
 
     function insertEmoji(emoji) {
@@ -286,9 +285,7 @@
             return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
         }).join(''));
         return JSON.parse(jsonPayload).username;
-      } catch (e) {
-        return "";
-      }
+      } catch (e) { return ""; }
     }
 
     function toggleAuthMode() {
@@ -302,80 +299,53 @@
 
     async function handleAuth(e) {
       if (e) e.preventDefault();
-
       const username = document.getElementById("auth-username").value.trim();
       const password = document.getElementById("auth-password").value;
-      
       if (!username || !password) return alert("Silakan isi semua kolom!");
 
       const url = isRegisterMode ? "/api/register" : "/api/login";
-      
       try {
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
-        
         const result = await response.json();
-        
-        if (!response.ok) {
-          alert(result.error || "Terjadi kesalahan!");
-          return;
-        }
+        if (!response.ok) return alert(result.error || "Terjadi kesalahan!");
 
         document.getElementById("auth-username").value = "";
         document.getElementById("auth-password").value = "";
-
         localStorage.setItem("chat_token", result.token);
-        await fetchUserRooms(); 
         showChatApp();
-        
-      } catch (err) {
-        alert("Gagal terhubung ke server.");
-      }
+      } catch (err) { alert("Gagal terhubung ke server."); }
     }
 
     async function fetchUserRooms() {
       const token = localStorage.getItem("chat_token");
       if (!token) return;
-
       try {
         const response = await fetch("/api/rooms", {
           method: "GET",
           headers: { "Authorization": `Bearer ${token}` }
         });
-
-        if (response.status === 401) {
-          logoutApp();
-          return;
-        }
-
+        if (response.status === 401) return logoutApp();
         const result = await response.json();
-        if (response.ok) {
-          joinedRooms = result.rooms || [];
-        }
-      } catch (e) {
-        console.error("Gagal memuat daftar room dari server", e);
-      }
+        if (response.ok) joinedRooms = result.rooms || [];
+      } catch (e) { console.error(e); }
     }
 
     async function showChatApp() {
       const token = localStorage.getItem("chat_token");
       MY_AUTHENTIC_USERNAME = getUsernameFromJWT(token);
-      
-      if (!MY_AUTHENTIC_USERNAME) {
-        logoutApp();
-        return;
-      }
+      if (!MY_AUTHENTIC_USERNAME) return logoutApp();
 
       await fetchUserRooms();
-
       document.getElementById("auth-container").style.display = "none";
       document.getElementById("app-container").style.removeProperty('display');
       usernameInput.value = MY_AUTHENTIC_USERNAME;
       renderRoomList();
       initEmojiPicker();
+      requestNotificationPermission();
     }
 
     function logoutApp() {
@@ -385,8 +355,7 @@
     }
 
     function toggleSidebar() {
-      const sidebar = document.getElementById("sidebar");
-      sidebar.classList.toggle("open");
+      document.getElementById("sidebar").classList.toggle("open");
     }
 
     function renderRoomList() {
@@ -436,30 +405,19 @@
       try {
         const response = await fetch("/api/rooms/join", {
           method: "POST",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({ room_id: roomId })
         });
-
         if (response.ok) {
-          if (!joinedRooms.includes(roomId)) {
-            joinedRooms.push(roomId);
-          }
+          if (!joinedRooms.includes(roomId)) joinedRooms.push(roomId);
           roomInput.value = "";
           connectToRoom(roomId);
-        } else {
-          alert("Gagal join ke room!");
-        }
-      } catch (err) {
-        alert("Terjadi kesalahan sistem.");
-      }
+        } else { alert("Gagal join ke room!"); }
+      } catch (err) { alert("Terjadi kesalahan sistem."); }
     }
 
     function connectToRoom(roomId) {
-      if (ws) { ws.close(); }
-
+      if (ws) ws.close();
       currentRoomId = roomId;
       unreadCounts[roomId] = 0;
 
@@ -468,6 +426,7 @@
       document.getElementById("input").disabled = false;
       document.getElementById("btn-emoji").disabled = false;
       document.getElementById("btn-send").disabled = false;
+      document.getElementById("btn-upload").disabled = false;
 
       renderRoomList();
       document.getElementById("sidebar").classList.remove("open");
@@ -481,7 +440,6 @@
         if (!event.data.trim()) return;
         try { displayMessage(JSON.parse(event.data)); } catch (e) { console.error(e); }
       };
-      
       ws.onclose = (e) => {
         if (e.code === 1006 || e.reason.includes("Unauthorized")) {
           alert("Sesi tidak valid! Silakan login kembali.");
@@ -495,29 +453,65 @@
       try {
         const response = await fetch("/api/rooms/leave", {
           method: "DELETE",
-          headers: { 
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-          },
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
           body: JSON.stringify({ room_id: roomId })
         });
-
         if (response.ok) {
           joinedRooms = joinedRooms.filter(r => r !== roomId);
           delete unreadCounts[roomId];
           if (currentRoomId === roomId) {
-            if (ws) ws.close();
             ws = null; currentRoomId = "";
             document.getElementById("current-room-title").textContent = "Pilih atau Masuk ke Room";
             document.getElementById("messages").innerHTML = "";
             document.getElementById("input").disabled = true;
             document.getElementById("btn-emoji").disabled = true;
             document.getElementById("btn-send").disabled = true;
+            document.getElementById("btn-upload").disabled = true;
           }
           renderRoomList();
         }
-      } catch (e) {
-        console.error("Gagal melakukan aksi leave room");
+      } catch (e) { console.error(e); }
+    }
+
+    async function handleFileUpload() {
+      const fileInput = document.getElementById("file-input");
+      if (fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const token = localStorage.getItem("chat_token");
+      const btnUpload = document.getElementById("btn-upload");
+
+      try {
+        btnUpload.textContent = "⏳";
+        btnUpload.disabled = true;
+
+        const response = await fetch(`/api/upload?room_id=${encodeURIComponent(currentRoomId)}`, {
+          method: "POST",
+          headers: { "Authorization": `Bearer ${token}` },
+          body: formData
+        });
+        const result = await response.json();
+        btnUpload.textContent = "📎";
+        btnUpload.disabled = false;
+
+        if (!response.ok) return alert(result.error || "Gagal mengunggah file");
+
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          const payload = {
+            username: MY_AUTHENTIC_USERNAME,
+            text: `[FILE:${result.url},${result.file_type},${result.filename}]`,
+            room_id: currentRoomId
+          };
+          ws.send(JSON.stringify(payload));
+        }
+        fileInput.value = "";
+      } catch (err) {
+        alert("Terjadi kesalahan saat mengunggah.");
+        btnUpload.textContent = "📎";
+        btnUpload.disabled = false;
       }
     }
 
@@ -539,7 +533,6 @@
 
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message");
-      
       let isIncoming = false;
 
       if (isMyOwnMessage) {
@@ -547,7 +540,6 @@
       } else {
         messageDiv.classList.add("received");
         isIncoming = true;
-        
         const nameSpan = document.createElement("span");
         nameSpan.className = "username";
         nameSpan.textContent = sender;
@@ -555,27 +547,39 @@
       }
 
       const textContentSpan = document.createElement("span");
-
       let rawText = msg.text || "";
-      let safeText = rawText
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
 
-      const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]|\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
-      
-      let formattedText = safeText.replace(urlPattern, function(url) {
-        let hrefUrl = url;
-        if (!/^https?:\/\//i.test(url)) {
-          hrefUrl = 'http://' + url;
+      if (rawText.startsWith("[FILE:") && rawText.endsWith("]")) {
+        const fileData = rawText.slice(6, -1).split(",");
+        const fileUrl = fileData[0];
+        const fileType = fileData[1] || "";
+        const fileName = fileData.slice(2).join(",");
+
+        if (fileType.startsWith("image/")) {
+          textContentSpan.innerHTML = `<img src="${fileUrl}" alt="${fileName}" style="max-width: 100%; max-height: 250px; border-radius: 8px; margin-top: 5px; display: block; cursor: pointer;" onclick="openMediaModal('${fileUrl}', 'image', '${fileName}')"/>`;
+        } else if (fileType.startsWith("video/")) {
+          textContentSpan.innerHTML = `
+            <div style="position: relative; cursor: pointer; margin-top: 5px;" onclick="openMediaModal('${fileUrl}', 'video', '${fileName}')">
+              <video style="max-width: 100%; max-height: 250px; border-radius: 8px; display: block; pointer-events: none;">
+                <source src="${fileUrl}" type="${fileType}">
+              </video>
+              <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.6); color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">▶</div>
+            </div>`;
+        } else {
+          textContentSpan.innerHTML = `<div style="display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.05); padding: 8px; border-radius: 6px; margin-top: 5px;"><span>📄</span><a href="${fileUrl}" target="_blank" download="${fileName}" style="color: #027eb5; text-decoration: underline; font-weight: 500; word-break: break-all;">${fileName}</a></div>`;
         }
-        return `<a href="${hrefUrl}" target="_blank" style="color: #027eb5; text-decoration: underline;">${url}</a>`;
-      });
+      } else {
+        let safeText = rawText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]|\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+        
+        let formattedText = safeText.replace(urlPattern, function(url) {
+          let hrefUrl = url;
+          if (!/^https?:\/\//i.test(url)) hrefUrl = 'http://' + url;
+          return `<a href="${hrefUrl}" target="_blank" style="color: #027eb5; text-decoration: underline;">${url}</a>`;
+        });
+        textContentSpan.innerHTML = formattedText.replace(/\n/g, "<br/>");
+      }
 
-      formattedText = formattedText.replace(/\n/g, "<br/>");
-      
-      textContentSpan.innerHTML = formattedText;
-      
       messageDiv.appendChild(textContentSpan);
       messagesContainer.appendChild(messageDiv);
       messageDiv.scrollIntoView({ behavior: "smooth", block: "end" });
@@ -588,14 +592,17 @@
       }
     }
 
+    function showDesktopNotification(title, body) {
+      if (Notification.permission === "granted") {
+        const notif = new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/733/733577.png" });
+        setTimeout(() => notif.close(), 4000);
+        notif.onclick = () => window.focus();
+      }
+    }
+
     function playNotifSound() {
       const sound = document.getElementById("notif-sound");
-      if (sound) {
-        sound.currentTime = 0;
-        sound.play().catch(err => {
-          console.log("Audio ditahan aturan interaksi browser:", err);
-        });
-      }
+      if (sound) { sound.currentTime = 0; sound.play().catch(()=>{}); }
     }
 
     function sendMessage() {
@@ -603,29 +610,48 @@
       const text = input.value.trim();
       if (text === "" || !ws || ws.readyState !== WebSocket.OPEN) return;
 
-      const payload = {
-        username: MY_AUTHENTIC_USERNAME,
-        text: text,
-        room_id: currentRoomId
-      };
-
-      ws.send(JSON.stringify(payload));
+      ws.send(JSON.stringify({ username: MY_AUTHENTIC_USERNAME, text: text, room_id: currentRoomId }));
       input.value = "";
       input.focus();
       document.getElementById("emoji-picker").style.display = "none";
     }
 
-    const msgInput = document.getElementById("input");
-    msgInput.onkeydown = (e) => {
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+    function openMediaModal(url, type, filename) {
+      const modal = document.getElementById("media-modal");
+      const content = document.getElementById("modal-content");
+      const caption = document.getElementById("modal-caption");
+
+      content.innerHTML = "";
+      caption.textContent = filename;
+
+      if (type === 'image') {
+        content.innerHTML = `<img src="${url}" style="max-width: 100%; max-height: 80vh; border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);" />`;
+      } else if (type === 'video') {
+        content.innerHTML = `<video controls autoplay style="max-width: 100%; max-height: 80vh; border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);"><source src="${url}">Browser Anda tidak mendukung video.</video>`;
       }
+
+      modal.style.display = "flex";
+    }
+
+    function closeMediaModal() {
+      const modal = document.getElementById("media-modal");
+      const content = document.getElementById("modal-content");
+
+      content.innerHTML = ""; 
+      modal.style.display = "none";
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeMediaModal();
+      }
+    });
+
+    document.getElementById("input").onkeydown = (e) => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     };
 
-    if (localStorage.getItem("chat_token")) {
-      showChatApp();
-    }
+    if (localStorage.getItem("chat_token")) showChatApp();
   </script>
 </body>
 </html>
