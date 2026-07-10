@@ -524,26 +524,25 @@
     function displayMessage(msg) {
       const messagesContainer = document.getElementById("messages");
       const targetRoom = msg.room_id || currentRoomId;
+      const sender = msg.username || "Anon";
+      const isMyOwnMessage = sender.toLowerCase() === MY_AUTHENTIC_USERNAME.toLowerCase();
 
       if (targetRoom !== currentRoomId) {
-        const sender = msg.username || "Anon";
-        if (sender.toLowerCase() !== MY_AUTHENTIC_USERNAME.toLowerCase() && !msg.is_history) {
+        if (!isMyOwnMessage && !msg.is_history) {
           unreadCounts[targetRoom] = (unreadCounts[targetRoom] || 0) + 1;
           renderRoomList();
           playNotifSound();
+          showDesktopNotification(`Pesan baru di #${targetRoom}`, `${sender}: ${msg.text}`);
         }
         return; 
       }
 
       const messageDiv = document.createElement("div");
       messageDiv.classList.add("message");
-
-      const myName = MY_AUTHENTIC_USERNAME.toLowerCase();
-      const sender = msg.username || "Anon";
       
       let isIncoming = false;
 
-      if (sender.toLowerCase() === myName) {
+      if (isMyOwnMessage) {
         messageDiv.classList.add("sent");
       } else {
         messageDiv.classList.add("received");
@@ -556,7 +555,25 @@
       }
 
       const textContentSpan = document.createElement("span");
-      const formattedText = (msg.text || "").replace(/\n/g, "<br/>");
+
+      let rawText = msg.text || "";
+      let safeText = rawText
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+      const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|]|\bwww\.[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+      
+      let formattedText = safeText.replace(urlPattern, function(url) {
+        let hrefUrl = url;
+        if (!/^https?:\/\//i.test(url)) {
+          hrefUrl = 'http://' + url;
+        }
+        return `<a href="${hrefUrl}" target="_blank" style="color: #027eb5; text-decoration: underline;">${url}</a>`;
+      });
+
+      formattedText = formattedText.replace(/\n/g, "<br/>");
+      
       textContentSpan.innerHTML = formattedText;
       
       messageDiv.appendChild(textContentSpan);
@@ -565,6 +582,9 @@
 
       if (isIncoming && !msg.is_history) {
         playNotifSound();
+        if (document.hidden) {
+          showDesktopNotification(`Pesan baru di #${currentRoomId}`, `${sender}: ${msg.text}`);
+        }
       }
     }
 
